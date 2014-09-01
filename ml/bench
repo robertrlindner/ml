@@ -1,5 +1,6 @@
 #!/usr/bin/python
-# Analyze and plot results of given 
+# Train classifier using parameters from
+$ provided parameter CSV file.
 
 
 import os
@@ -14,9 +15,8 @@ import numpy as np
 import pickle
 from sklearn.ensemble import GradientBoostingClassifier
 
+import ml # module file
 
-import ml
-#import ANN
 
 def transform(opt):
     for dic in opt:
@@ -24,8 +24,8 @@ def transform(opt):
             dic[key] = parse(dic[key])
     return opt
 
-def parse(item):
 
+def parse(item):
     try: 
         item = float(item)
     except ValueError:
@@ -35,13 +35,15 @@ def parse(item):
 
     if item == math.floor(item): return int(item)
     return item
+
     
 def load_csv(filename):
     opts = csv.DictReader(open(filename))
     opt_list = [opt for opt in opts]
     return opt_list
 
-def write_csv(dlist, filename='/home/robert/Projects/StockMarket/output.csv'):
+
+def write_csv(dlist, filename='output.csv'):
     csvfile = open(filename,'w')
     fieldnames = dlist[0].keys()
     row1 = dict(zip(fieldnames, fieldnames))
@@ -52,11 +54,10 @@ def write_csv(dlist, filename='/home/robert/Projects/StockMarket/output.csv'):
     csvfile.close()
 
 
-def benchmark(X, Y, estimator, opts=None, path = '/home/robert/Projects/StockMarket/Pickles/', decision=0.5):
+def benchmark(X, Y, estimator, opts=None, decision=0.5):
     for i, opt in enumerate(opts):
         print i+1, ' of ', len(opts)
         t0 = time.time()
-
 
         # n_folds and decision are specific to NFold only, 
         # so pop them out separately.
@@ -73,13 +74,13 @@ def benchmark(X, Y, estimator, opts=None, path = '/home/robert/Projects/StockMar
         opts[i].update(out['mean_train_scores'])
         opts[i].update(kwargs)
 
-
-    #  Save resuts    
+    #  Save results    
     filename = str(datetime.datetime.now()) + '.csv'
     write_csv(opts, filename=filename)
 
-if __name__=='__main__':
 
+
+if __name__=='__main__':
 
     os.system('clear')
     if len(sys.argv) == 1:

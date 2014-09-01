@@ -11,12 +11,11 @@ from sklearn.ensemble import GradientBoostingClassifier
 def mean_keys(dict_list):
     return dict([(key,np.mean([dic[key] for dic in dict_list])) for key in dict_list[0]])
 
-def score(x, y, val='precision', tag=''):
 
+def score(x, y, val='precision', tag=''):
     if len(x)!=len(y):
         print 'Arrays need to be the same size.'
         return
-
     if tag: tag = '-'+tag
 
     x = np.array(x)
@@ -29,14 +28,12 @@ def score(x, y, val='precision', tag=''):
     precision = TP / (TP + FP) if TP > 0 else 0.
     recall = TP / (TP + FN) if TP > 0 else 0.
 
-    likelihood = precision / ((float(np.sum(y))/len(y)) * (1-precision) + precision)
-
     if precision == 0. or recall == 0: 
         F1 = 0.
     else:
         F1 = 2. * precision * recall / (precision + recall)
     out = dict([('Acc'+tag,acc),('F1'+tag,F1),('precision'+tag,precision),('recall'+tag,recall),
-                 ('TP'+tag,TP),('TN'+tag,TN),('FP'+tag,FP),('FN'+tag,FN),('likelihood'+tag,likelihood)])
+                 ('TP'+tag,TP),('TN'+tag,TN),('FP'+tag,FP),('FN'+tag,FN)])
     return out
 
 

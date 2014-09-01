@@ -21,8 +21,6 @@ def plot(csvfile, xcol, ycols):
     plt.show()
     
 
-
-
 if __name__=='__main__':
 
     os.system('clear')
