@@ -17,11 +17,11 @@ def rscore(x, y, tag=''):
     x = np.array(x)
     y = np.array(y)
 
-    MSE = np.mean( (x-y)**2 )
+    RMSE = np.sqrt(np.mean( (x-y)**2 ))
     MAFE = np.mean( np.abs((x-y)/y) )
     MAD = np.mean(x-y)
 
-    out = dict([('MSE'+tag,MSE),('MAD'+tag,MAD),('MAFE'+tag,MAFE)])
+    out = dict([('RMSE'+tag,RMSE),('MAD'+tag,MAD),('MAFE'+tag,MAFE)])
 
     return out
 
