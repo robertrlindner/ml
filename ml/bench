@@ -12,11 +12,37 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
+
+
+t0=time.time()
+
+
+
+
+
+
+
+# Linear models
+from sklearn import linear_model
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import LogisticRegression
+
+# Tree-based models
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import RandomForestRegressor
 
-
+# Custom libraries
 import ml
 #import ANN
+
+
+algos = {'R1':{'name':'Gradient Boosting Regression','estimator':GradientBoostingRegressor,'classifier':False},
+         'R2':{'name': 'Lasso (L1) regularized Regression','estimator':Lasso,'classifier':False}}
+
+
+
 
 def transform(opt):
     for dic in opt:
@@ -29,8 +55,8 @@ def parse(item):
     try: 
         item = float(item)
     except ValueError:
-        if item == 'FALSE': return False
-        if item == 'None': return None
+        if item.lower() == 'false': return False
+        if item.lower() == 'none': return None
         return item
 
     if item == math.floor(item): return int(item)
@@ -41,18 +67,20 @@ def load_csv(filename):
     opt_list = [opt for opt in opts]
     return opt_list
 
-def write_csv(dlist, filename='/home/robert/Projects/StockMarket/output.csv'):
+def write_csv(dlist, filename='output.csv'):
     csvfile = open(filename,'w')
     fieldnames = dlist[0].keys()
     row1 = dict(zip(fieldnames, fieldnames))
     out = csv.DictWriter(csvfile,fieldnames)
     out.writerow(row1)
     for dic in dlist:
+        for key in dic:
+            dic[key]='None' if dic[key]==None else dic[key]
         out.writerow(dic)
     csvfile.close()
 
 
-def benchmark(X, Y, estimator, opts=None, path = '/home/robert/Projects/StockMarket/Pickles/', decision=0.5):
+def benchmark(X, Y, estimator, opts=None, decision=0.5, classification=True):
     for i, opt in enumerate(opts):
         print i+1, ' of ', len(opts)
         t0 = time.time()
@@ -66,35 +94,46 @@ def benchmark(X, Y, estimator, opts=None, path = '/home/robert/Projects/StockMar
         if 'decision' in opt:
             kwargs.update({'decision':opt.pop('decision')})
 
-        out  = ml.NFold(X, Y, estimator = estimator(**opts[i]), **kwargs)
+        out  = ml.NFold(X, Y, estimator = estimator(**opts[i]),
+                                     classification=classification, **kwargs)
+
         dt = time.time() - t0
-        opts[i].update({'dt':dt})
+        opts[i].update({'dt':'{0:3.1f}'.format(dt)})
         opts[i].update(out['mean_CV_scores'])
         opts[i].update(out['mean_train_scores'])
         opts[i].update(kwargs)
 
 
-    #  Save resuts    
-    filename = str(datetime.datetime.now()) + '.csv'
+    #  Save resuts
+    filename = 'output.csv'
     write_csv(opts, filename=filename)
 
 if __name__=='__main__':
-
-
     os.system('clear')
+
+    # Display menu
     if len(sys.argv) == 1:
-        print '$ bench [paramfile] [Xfile] [Yfile]'
+        print 'Available algorithms:'
+        for key in algos:
+            print key + ' ... ' + algos[key]['name']
         quit()
 
-    # APPL stock
+    
+    elif (len(sys.argv) == 2) and sys.argv[1] in algos:
+        print 'Creating default parameter file: default_params.csv'
+        paramfile = open('params.csv','w')
+        params = algos[sys.argv[1]]['estimator']().get_params()
+        write_csv([params], filename='default_params.csv')        
+        quit()
+    
+    print 'Chosen: ', algos[sys.argv[1]]['name']
     print 'Loading data...',
-    X = np.loadtxt(sys.argv[2], delimiter=',')
-    Y = np.loadtxt(sys.argv[3], delimiter=',')
+    opts = transform(load_csv(sys.argv[2]))
+    X = np.loadtxt(sys.argv[3], delimiter=',')
+    Y = np.loadtxt(sys.argv[4], delimiter=',')
     print 'finished.'
 
-    os.system('clear')
-    opts = transform(load_csv(sys.argv[1]))
-    
-    estimator = GradientBoostingClassifier
-    benchmark(X, Y, estimator, opts)
+
+    benchmark(X, Y, algos[sys.argv[1]]['estimator'], 
+              opts, classification = algos[sys.argv[1]]['classifier'])
     
