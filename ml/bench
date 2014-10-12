@@ -24,14 +24,17 @@ t0=time.time()
 
 # Linear models
 from sklearn import linear_model
-from sklearn.linear_model import Ridge
+#from sklearn.linear_model import Ridge
 from sklearn.linear_model import Lasso
-from sklearn.linear_model import LogisticRegression
+#from sklearn.linear_model import LogisticRegression
 
 # Tree-based models
-from sklearn.ensemble import GradientBoostingClassifier
+#from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.ensemble import RandomForestRegressor
+#from sklearn.ensemble import RandomForestRegressor
+from sklearn.neighbors import KNeighborsRegressor
+
+from sklearn.svm import SVM.SVR
 
 # Custom libraries
 import ml
@@ -39,8 +42,9 @@ import ml
 
 
 algos = {'R1':{'name':'Gradient Boosting Regression','estimator':GradientBoostingRegressor,'classifier':False},
-         'R2':{'name': 'Lasso (L1) regularized Regression','estimator':Lasso,'classifier':False}}
-
+         'R2':{'name': 'Lasso (L1) regularized Regression','estimator':Lasso,'classifier':False},
+         'R3':{'name': 'SVM Regression','estimator':SVR,'classifier':False},
+         'R4':{'name': 'K-nearest neighbors regressor','estimator':KNeighborsRegressor,'classifier':False}}
 
 
 
@@ -81,6 +85,8 @@ def write_csv(dlist, filename='output.csv'):
 
 
 def benchmark(X, Y, estimator, opts=None, decision=0.5, classification=True):
+
+    estimators = [None for i in opts]
     for i, opt in enumerate(opts):
         print i+1, ' of ', len(opts)
         t0 = time.time()
@@ -102,10 +108,12 @@ def benchmark(X, Y, estimator, opts=None, decision=0.5, classification=True):
         opts[i].update(out['mean_CV_scores'])
         opts[i].update(out['mean_train_scores'])
         opts[i].update(kwargs)
+        estimators[i] = out['estimators']
 
 
     #  Save resuts
     filename = 'output.csv'
+    pickle.dump(estimators, open('estimators.pickle','w'))
     write_csv(opts, filename=filename)
 
 if __name__=='__main__':
@@ -123,7 +131,7 @@ if __name__=='__main__':
         print 'Creating default parameter file: default_params.csv'
         paramfile = open('params.csv','w')
         params = algos[sys.argv[1]]['estimator']().get_params()
-        write_csv([params], filename='default_params.csv')        
+        write_csv([params], filename = sys.argv[1] + '_default_params.csv')        
         quit()
     
     print 'Chosen: ', algos[sys.argv[1]]['name']
