@@ -1,5 +1,6 @@
 #!/usr/bin/python
-# Analyze and plot results of given 
+# Train classifier using parameters from
+$ provided parameter CSV file.
 
 
 import os
@@ -13,13 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 
-
-t0=time.time()
-
-
-
-
-
+import ml # module file
 
 
 # Linear models
@@ -37,7 +32,6 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 
 # Custom libraries
-import ml
 #import ANN
 
 
@@ -55,8 +49,8 @@ def transform(opt):
             dic[key] = parse(dic[key])
     return opt
 
-def parse(item):
 
+def parse(item):
     try: 
         item = float(item)
     except ValueError:
@@ -66,6 +60,7 @@ def parse(item):
 
     if item == math.floor(item): return int(item)
     return item
+
     
 def load_csv(filename):
     opts = csv.DictReader(open(filename))
@@ -91,7 +86,6 @@ def benchmark(X, Y, estimator, opts=None, decision=0.5, classification=True):
     for i, opt in enumerate(opts):
         print i+1, ' of ', len(opts)
         t0 = time.time()
-
 
         # n_folds and decision are specific to NFold only, 
         # so pop them out separately.

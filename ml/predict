@@ -1,0 +1,28 @@
+#!/usr/bin/python
+
+import sys
+import pickle
+import numpy as np
+
+
+
+if __name__ == '__main__':
+    estimators = pickle.load(open(sys.argv[1]))
+    print estimators
+    estimators = estimators[int(sys.argv[2])]
+
+    n_folds = len(estimators)
+
+    X = np.loadtxt(sys.argv[3], delimiter = ',')
+
+    n_examples = X.shape[0]
+
+    Y_list = np.zeros([n_examples,n_folds])
+    for i in range(n_folds):
+        Y_list[:,i] = estimators[i].predict(X)
+  
+    prediction = np.mean(Y_list, 1)
+
+    np.savetxt(sys.argv[4],prediction,delimiter=',')
+
+    
