@@ -19,7 +19,7 @@ def rscore(x, y, tag=''):
 
     RMSE = np.sqrt(np.mean( (x-y)**2 ))
     MAFE = np.mean( np.abs((x-y)/y) )
-    MAD = np.mean(x-y)
+    MAD = np.mean(np.abs(x-y))
 
     out = dict([('RMSE'+tag,RMSE),('MAD'+tag,MAD),('MAFE'+tag,MAFE)])
 
@@ -51,7 +51,7 @@ def cscore(x, y, tag=''):
         F1 = 2. * precision * recall / (precision + recall)
     out = dict([('Acc'+tag,acc),('F1'+tag,F1),('precision'+tag,precision),('recall'+tag,recall),
                  ('TP'+tag,TP),('TN'+tag,TN),('FP'+tag,FP),('FN'+tag,FN),('likelihood'+tag,likelihood)])
-    
+
     return out
 
 
@@ -62,6 +62,8 @@ def NFold(X, Y, n_folds = 4, decision=0.5, estimator=None, classification=True):
     index = np.arange(m)
     CV_scores = [None for i in range(n_folds)]
     train_scores = [None for i in range(n_folds)]
+    estimators = [None for i in range(n_folds)]
+
     for i in range(n_folds):
         print 'NFOLD: ', i+1
         # CV
@@ -90,16 +92,24 @@ def NFold(X, Y, n_folds = 4, decision=0.5, estimator=None, classification=True):
         score = cscore if classification else rscore
         CV_scores[i] = score(cv_predictions, Y_CV, tag='cv')
         train_scores[i] = score(train_predictions, Y_train, tag='train')
+        estimators[i] = estimator
 
+
+        for key in train_scores[i]:
+            print key, ' ', train_scores[i][key] 
+        for key in CV_scores[i]:
+            print key, ' ', CV_scores[i][key] 
 
 
     out = {'mean_CV_scores':mean_keys(CV_scores),
-          'mean_train_scores':mean_keys(train_scores)}
+          'mean_train_scores':mean_keys(train_scores),
+          'estimators':estimators}
 
     # Format the output to 2 sigfigs
     for top_key in ['mean_CV_scores', 'mean_train_scores']:
         for key in out[top_key]:
             out[top_key][key] = '{0:3.2f}'.format(out[top_key][key])
+
 
 
     return out
